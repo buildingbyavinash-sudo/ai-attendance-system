@@ -51,17 +51,19 @@ async function indexFaces() {
     if (msg) msg.innerText = "Indexing Member Biometrics...";
 
     state.labeledDescriptors = [];
+    console.log("Starting biometric indexing for", state.users.length, "users");
 
     for (const user of state.users) {
         try {
-            // Fetch image and create descriptor
-            // Use crossOrigin to avoid canvas pollution
             const img = new Image();
             img.crossOrigin = 'anonymous';
             img.src = user.image;
-            await new Promise((res) => img.onload = res);
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
 
-            const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+            const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
@@ -69,15 +71,20 @@ async function indexFaces() {
                 state.labeledDescriptors.push(
                     new faceapi.LabeledFaceDescriptors(user.id, [detections.descriptor])
                 );
+                console.log(`Indexed biometrics for: ${user.name}`);
+            } else {
+                console.warn(`Could not find face in profile photo for: ${user.name}`);
             }
         } catch (e) {
-            console.warn(`Could not index face for ${user.name}:`, e);
+            console.error(`Failed to index face for ${user.name}:`, e);
         }
     }
 
     if (state.labeledDescriptors.length > 0) {
-        faceMatcher = new faceapi.FaceMatcher(state.labeledDescriptors, 0.6);
+        // Use 0.4 threshold for MUCH higher accuracy
+        faceMatcher = new faceapi.FaceMatcher(state.labeledDescriptors, 0.4);
         if (msg) msg.innerText = "Biometric Indexing Complete";
+        console.log("AI Matcher ready with 0.4 threshold");
     } else {
         if (msg) msg.innerText = "No biometric data available";
     }
@@ -630,15 +637,16 @@ async function startEngineLoop() {
 
             if (detections) {
                 const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
+                console.log(`AI Match attempt: ${bestMatch.label} (Distance: ${bestMatch.distance.toFixed(3)})`);
 
                 if (bestMatch.label !== 'unknown') {
                     const user = state.users.find(u => u.id === bestMatch.label);
-                    // Match found! 
-                    if (user && bestMatch.distance < 0.5) { // Threshold for correctness
+                    // Match found! Stricter check
+                    if (user && bestMatch.distance < 0.4) {
                         showConfirmation(user);
                     }
                 } else {
-                    if (msg) msg.innerText = "Analyzing... (Unrecognized)";
+                    if (msg) msg.innerText = "Analyzing... (Low Confidence)";
                 }
             } else {
                 if (msg) msg.innerText = "Searching for Faces...";
