@@ -38,10 +38,17 @@ if SUPABASE_URL and SUPABASE_KEY:
 # Connection pool for PostgreSQL
 db_pool = None
 if DATABASE_URL:
-    try:
-        db_pool = psycopg2.pool.SimpleConnectionPool(1, 20, dsn=DATABASE_URL)
-    except Exception as e:
-        print(f"Error creating database connection pool: {e}")
+    import time
+    for i in range(5): # Try 5 times
+        try:
+            db_pool = psycopg2.pool.SimpleConnectionPool(1, 20, dsn=DATABASE_URL)
+            print("Database connection pool created successfully")
+            break
+        except Exception as e:
+            print(f"Database connection attempt {i+1} failed: {e}")
+            time.sleep(2) # Wait 2 seconds before retry
+    if not db_pool:
+        print("Final database connection attempt failed. App will run but DB features will fail.")
 
 # FIXED PATH LOGIC
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -53,8 +60,10 @@ if os.path.exists(FRONTEND_DIR):
 
 @contextmanager
 def get_db():
+    if not DATABASE_URL:
+        raise HTTPException(status_code=500, detail="DATABASE_URL environment variable is missing in Render settings.")
     if not db_pool:
-        raise HTTPException(status_code=500, detail="Database connection not configured")
+        raise HTTPException(status_code=500, detail="Database connection pool failed to initialize. Check Render Logs for the exact error.")
     conn = db_pool.getconn()
     try:
         yield conn
