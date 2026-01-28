@@ -8,8 +8,8 @@ services:
       - key: PORT
         value: 10000
       - key: DATABASE_URL
-        sync: false # User will provide this in Render Dashboard
-    disk:
-      name: data
-      mountPath: /data
-      sizeGB: 1
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
