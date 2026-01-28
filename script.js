@@ -3,6 +3,11 @@ lucide.createIcons();
 
 const API_URL = window.location.origin;
 
+// Face API Configuration
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+let faceMatcher = null;
+let modelsLoaded = false;
+
 // App State
 const state = {
     org: JSON.parse(localStorage.getItem('attendance_org')) || null,
@@ -14,8 +19,69 @@ const state = {
     charts: {},
     regStream: null,
     capturedBlob: null,
-    pendingRecognition: null
+    pendingRecognition: null,
+    labeledDescriptors: []
 };
+
+// --- AI ENGINE LOADER ---
+async function loadModels() {
+    if (modelsLoaded) return;
+    try {
+        const msg = document.getElementById('detection-msg');
+        if (msg) msg.innerText = "Loading AI Models...";
+
+        await Promise.all([
+            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
+            faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
+        ]);
+
+        modelsLoaded = true;
+        if (msg) msg.innerText = "AI Models Ready";
+    } catch (err) {
+        console.error("Model loading failed:", err);
+        showToast("AI initialization failed. Check connection.", "error");
+    }
+}
+
+async function indexFaces() {
+    if (!modelsLoaded || state.users.length === 0) return;
+
+    const msg = document.getElementById('detection-msg');
+    if (msg) msg.innerText = "Indexing Member Biometrics...";
+
+    state.labeledDescriptors = [];
+
+    for (const user of state.users) {
+        try {
+            // Fetch image and create descriptor
+            // Use crossOrigin to avoid canvas pollution
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = user.image;
+            await new Promise((res) => img.onload = res);
+
+            const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+            if (detections) {
+                state.labeledDescriptors.push(
+                    new faceapi.LabeledFaceDescriptors(user.id, [detections.descriptor])
+                );
+            }
+        } catch (e) {
+            console.warn(`Could not index face for ${user.name}:`, e);
+        }
+    }
+
+    if (state.labeledDescriptors.length > 0) {
+        faceMatcher = new faceapi.FaceMatcher(state.labeledDescriptors, 0.6);
+        if (msg) msg.innerText = "Biometric Indexing Complete";
+    } else {
+        if (msg) msg.innerText = "No biometric data available";
+    }
+}
 
 // --- AUTH & NAVIGATION ---
 function showAuth(type) {
@@ -99,7 +165,7 @@ function logout() {
 }
 
 // --- DASHBOARD CONTROLLER ---
-function initializeDashboard() {
+async function initializeDashboard() {
     document.getElementById('landing-page').classList.add('hidden');
     document.getElementById('dashboard-view').classList.remove('hidden');
 
@@ -107,7 +173,8 @@ function initializeDashboard() {
     document.getElementById('org-display-type').innerText = state.org.type;
     document.getElementById('org-avatar').innerText = state.org.name[0].toUpperCase();
 
-    loadAllData();
+    await loadModels();
+    await loadAllData();
     initCharts();
 }
 
@@ -187,6 +254,7 @@ function exportReport(format) {
 async function loadAllData() {
     await loadClasses();
     await loadUsers();
+    await indexFaces();
     updateStats();
 }
 
@@ -514,14 +582,18 @@ function renderUserTable() {
 const videoMain = document.getElementById('cam-feed');
 const camToggle = document.getElementById('cam-toggle');
 
-camToggle.addEventListener('click', () => {
-    if (state.cameraActive) stopCamera();
-    else startCamera();
+camToggle.addEventListener('click', async () => {
+    if (state.cameraActive) {
+        stopCamera();
+    } else {
+        await loadModels();
+        startCamera();
+    }
 });
 
 async function startCamera() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 1280, height: 720 } });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { width: 640, height: 480 } });
         videoMain.srcObject = stream;
         state.cameraActive = true;
         camToggle.innerHTML = '<i data-lucide="square"></i> Shutdown engine';
@@ -538,14 +610,43 @@ function stopCamera() {
     hideConfirmation();
 }
 
-let engineInterval;
-function startEngineLoop() {
-    engineInterval = setInterval(() => {
-        if (!state.cameraActive || state.pendingRecognition) return;
-        if (state.users.length > 0 && Math.random() > 0.8) {
-            showConfirmation(state.users[Math.floor(Math.random() * state.users.length)]);
+async function startEngineLoop() {
+    if (!state.cameraActive || !modelsLoaded || !faceMatcher) return;
+
+    const msg = document.getElementById('detection-msg');
+
+    const interval = setInterval(async () => {
+        if (!state.cameraActive) {
+            clearInterval(interval);
+            return;
         }
-    }, 4000);
+
+        if (state.pendingRecognition) return;
+
+        try {
+            const detections = await faceapi.detectSingleFace(videoMain, new faceapi.TinyFaceDetectorOptions())
+                .withFaceLandmarks()
+                .withFaceDescriptor();
+
+            if (detections) {
+                const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
+
+                if (bestMatch.label !== 'unknown') {
+                    const user = state.users.find(u => u.id === bestMatch.label);
+                    // Match found! 
+                    if (user && bestMatch.distance < 0.5) { // Threshold for correctness
+                        showConfirmation(user);
+                    }
+                } else {
+                    if (msg) msg.innerText = "Analyzing... (Unrecognized)";
+                }
+            } else {
+                if (msg) msg.innerText = "Searching for Faces...";
+            }
+        } catch (e) {
+            console.error("Detection error:", e);
+        }
+    }, 1000); // Scan every second
 }
 
 function showConfirmation(user) {
