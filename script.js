@@ -28,19 +28,19 @@ async function loadModels() {
     if (modelsLoaded) return;
     try {
         const msg = document.getElementById('detection-msg');
-        if (msg) msg.innerText = "Loading AI Models...";
+        if (msg) msg.innerText = "Loading High-Accuracy AI...";
 
         await Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
+            faceapi.nets.ssdMobilenetv1.loadFromUri(MODEL_URL),
             faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL),
             faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL)
         ]);
 
         modelsLoaded = true;
-        if (msg) msg.innerText = "AI Models Ready";
+        if (msg) msg.innerText = "AI Systems Online";
     } catch (err) {
         console.error("Model loading failed:", err);
-        showToast("AI initialization failed. Check connection.", "error");
+        showToast("AI initialization failed.", "error");
     }
 }
 
@@ -63,7 +63,7 @@ async function indexFaces() {
                 img.onerror = reject;
             });
 
-            const detections = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+            const detections = await faceapi.detectSingleFace(img)
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
@@ -81,12 +81,9 @@ async function indexFaces() {
     }
 
     if (state.labeledDescriptors.length > 0) {
-        // Use 0.4 threshold for MUCH higher accuracy
-        faceMatcher = new faceapi.FaceMatcher(state.labeledDescriptors, 0.4);
+        // Threshold 0.35 is VERY strict (Highest accuracy)
+        faceMatcher = new faceapi.FaceMatcher(state.labeledDescriptors, 0.35);
         if (msg) msg.innerText = "Biometric Indexing Complete";
-        console.log("AI Matcher ready with 0.4 threshold");
-    } else {
-        if (msg) msg.innerText = "No biometric data available";
     }
 }
 
@@ -631,18 +628,19 @@ async function startEngineLoop() {
         if (state.pendingRecognition) return;
 
         try {
-            const detections = await faceapi.detectSingleFace(videoMain, new faceapi.TinyFaceDetectorOptions())
+            // High-precision scanning
+            const detections = await faceapi.detectSingleFace(videoMain)
                 .withFaceLandmarks()
                 .withFaceDescriptor();
 
             if (detections) {
                 const bestMatch = faceMatcher.findBestMatch(detections.descriptor);
-                console.log(`AI Match attempt: ${bestMatch.label} (Distance: ${bestMatch.distance.toFixed(3)})`);
+                console.log(`AI Confidence Check: ${bestMatch.label} (Value: ${bestMatch.distance.toFixed(3)})`);
 
                 if (bestMatch.label !== 'unknown') {
                     const user = state.users.find(u => u.id === bestMatch.label);
-                    // Match found! Stricter check
-                    if (user && bestMatch.distance < 0.4) {
+                    // Match found! Must pass 0.35 threshold (Strictest)
+                    if (user && bestMatch.distance < 0.35) {
                         showConfirmation(user);
                     }
                 } else {
