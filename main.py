@@ -39,16 +39,22 @@ if SUPABASE_URL and SUPABASE_KEY:
 db_pool = None
 if DATABASE_URL:
     import time
-    for i in range(5): # Try 5 times
+    print(f"Attempting to connect to database...")
+    for i in range(5):
         try:
-            db_pool = psycopg2.pool.SimpleConnectionPool(1, 20, dsn=DATABASE_URL)
-            print("Database connection pool created successfully")
+            # Use SimpleConnectionPool with a raw DSN string
+            db_pool = psycopg2.pool.SimpleConnectionPool(
+                1, 20, 
+                dsn=DATABASE_URL
+            )
+            print("Successfully connected to Supabase!")
             break
         except Exception as e:
-            print(f"Database connection attempt {i+1} failed: {e}")
-            time.sleep(2) # Wait 2 seconds before retry
+            print(f"Connection attempt {i+1} failed. Error: {e}")
+            time.sleep(3)
+    
     if not db_pool:
-        print("Final database connection attempt failed. App will run but DB features will fail.")
+        print("CRITICAL: All database connection attempts failed.")
 
 # FIXED PATH LOGIC
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -189,9 +195,8 @@ async def register_user(
             file=content,
             file_options={"content-type": "image/jpeg"}
         )
-        # Get Public URL
-        res = supabase.storage.from_("faces").get_public_url(filename)
-        db_image_path = res
+        # Generate the permanent public URL for Supabase Storage
+        db_image_path = f"{SUPABASE_URL}/storage/v1/object/public/faces/{filename}"
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Storage upload failed: {str(e)}")
     
@@ -267,7 +272,7 @@ async def update_user(
                 file=content,
                 file_options={"upsert": "true", "content-type": "image/jpeg"}
             )
-            db_path = supabase.storage.from_("faces").get_public_url(filename)
+            db_path = f"{SUPABASE_URL}/storage/v1/object/public/faces/{filename}"
             cursor.execute("UPDATE users SET name=%s, enrollment_id=%s, roll_no=%s, class_id=%s, image_path=%s WHERE id=%s", (name, enrollment_id, roll_no, class_id, db_path, user_id))
         else:
             cursor.execute("UPDATE users SET name=%s, enrollment_id=%s, roll_no=%s, class_id=%s WHERE id=%s", (name, enrollment_id, roll_no, class_id, user_id))
