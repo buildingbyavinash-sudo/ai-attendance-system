@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+attendance_v3.db
+attendance_v2.db
+faces/
+.env
+.vscode/
+.DS_Store
+node_modules/

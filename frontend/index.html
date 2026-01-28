@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI-Pro Attendance | The Future of Institutional Tracking</title>
+    <link rel="stylesheet" href="/frontend/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+</head>
+
+<body class="saas-theme">
+    <div id="app">
+
+        <!-- SECTION 1: PUBLIC LANDING PAGE (WEBSITE) -->
+        <div id="landing-page" class="view-root active">
+            <nav class="landing-nav">
+                <div class="logo">
+                    <i data-lucide="scan-eye"></i>
+                    <span>AI-Pro</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How it Works</a>
+                    <a href="#pricing">Pricing</a>
+                </div>
+                <div class="nav-auth">
+                    <button class="ghost-btn" onclick="showAuth('login')">Login</button>
+                    <button class="primary-btn" onclick="showAuth('signup')">Get Started</button>
+                </div>
+            </nav>
+
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <span class="badge">Artificial Intelligence • Cloud Management</span>
+                    <h1>Smart Attendance for the <span>Modern Institution</span></h1>
+                    <p>Eliminate manual logs and card swiping. Use AI Face Recognition to track attendance for Schools,
+                        Colleges, and Offices with 99.9% accuracy.</p>
+                    <div class="hero-cta">
+                        <button class="primary-btn lg" onclick="showAuth('signup')">Register Institution <i
+                                data-lucide="arrow-right"></i></button>
+                        <button class="secondary-btn lg" onclick="scrollToId('features')">Watch Demo</button>
+                    </div>
+                    <div class="hero-stats">
+                        <div class="h-stat"><strong>500+</strong> <span>Schools</span></div>
+                        <div class="h-stat"><strong>200k+</strong> <span>Students</span></div>
+                        <div class="h-stat"><strong>99.9%</strong> <span>Accuracy</span></div>
+                    </div>
+                </div>
+                <div class="hero-visual">
+                    <div class="visual-wrapper animate__animated animate__fadeInRight">
+                        <div class="mockup-card">
+                            <div class="mockup-header">
+                                <div class="dots"><span></span><span></span><span></span></div>
+                                <div class="url-bar">ai-pro-attendance.io</div>
+                            </div>
+                            <img src="https://raw.githubusercontent.com/justadudewhohacks/face-api.js/master/images/bbt1.jpg"
+                                alt="Scanning Mockup">
+                            <div class="floating-notif">
+                                <i data-lucide="check-circle" class="success"></i>
+                                <span>John Doe Identified</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features Grid -->
+            <section id="features" class="features-section">
+                <div class="section-title">
+                    <h2>Advanced Capabilities</h2>
+                    <p>Everything you need to manage attendance at scale.</p>
+                </div>
+                <div class="f-grid">
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="camera"></i></div>
+                        <h3>AI Recognition</h3>
+                        <p>Industry leading biometric detection directly through the web browser.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="clock"></i></div>
+                        <h3>Time-Based Automation</h3>
+                        <p>Set rules for Present, Late, and Absent status automatically.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="file-bar-chart"></i></div>
+                        <h3>Deep Analytics</h3>
+                        <p>Daily, weekly, and monthly reports with individual history logs.</p>
+                    </div>
+                    <div class="f-card">
+                        <div class="f-icon"><i data-lucide="shield-check"></i></div>
+                        <h3>SaaS Multi-Tenancy</h3>
+                        <p>Private database for your institution with secure cloud access.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- SECTION 2: AUTH OVERLAY -->
+        <div id="auth-overlay" class="overlay hidden">
+            <div class="auth-card animate__animated animate__zoomIn">
+                <button class="close-auth" onclick="hideAuth()"><i data-lucide="x"></i></button>
+                <div class="auth-tabs">
+                    <button class="auth-tab-btn active" id="tab-login" onclick="switchAuth('login')">Login</button>
+                    <button class="auth-tab-btn" id="tab-signup" onclick="switchAuth('signup')">Sign Up</button>
+                </div>
+
+                <div id="login-form-container">
+                    <h2>Welcome Back</h2>
+                    <p>Access your institution portal</p>
+                    <form id="login-form">
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" id="login-email" required placeholder="admin@institute.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" id="login-password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="primary-btn full-width">Sign In</button>
+                    </form>
+                </div>
+
+                <div id="signup-form-container" class="hidden">
+                    <h2>Register</h2>
+                    <p>Scale your institutional management</p>
+                    <form id="signup-form">
+                        <div class="input-group">
+                            <label>Institution Name</label>
+                            <input type="text" id="signup-name" required placeholder="e.g. Stanford University">
+                        </div>
+                        <div class="input-group">
+                            <label>Email Address</label>
+                            <input type="email" id="signup-email" required placeholder="admin@institute.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Password</label>
+                            <input type="password" id="signup-password" required placeholder="••••••••">
+                        </div>
+                        <div class="input-group">
+                            <label>Institution Type</label>
+                            <select id="signup-type">
+                                <option value="school">School</option>
+                                <option value="college">College</option>
+                                <option value="office">Office</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="primary-btn full-width">Create Account</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: PRODUCT DASHBOARD -->
+        <div id="dashboard-view" class="hidden">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <i data-lucide="scan-eye"></i>
+                    <span>AI-Pro Dashboard</span>
+                </div>
+                <nav class="sidebar-nav">
+                    <button class="nav-item active" onclick="navTo('overview')"><i data-lucide="layout-dashboard"></i>
+                        Overview</button>
+                    <button class="nav-item" onclick="navTo('attendance')"><i data-lucide="camera"></i> Live
+                        Engine</button>
+                    <button class="nav-item" onclick="navTo('management')"><i data-lucide="users"></i> Data
+                        Records</button>
+                    <button class="nav-item" onclick="navTo('reports')"><i data-lucide="file-bar-chart"></i>
+                        Reports</button>
+                </nav>
+                <div class="sidebar-footer">
+                    <div class="user-info">
+                        <div class="avatar" id="org-avatar">A</div>
+                        <div class="details">
+                            <p id="org-display-name">Admin</p>
+                            <span id="org-display-type">Institute</span>
+                        </div>
+                    </div>
+                    <button class="logout-btn" onclick="logout()"><i data-lucide="log-out"></i> Logout</button>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <!-- Views -->
+                <section id="overview" class="view active">
+                    <header class="view-header">
+                        <h1>Command Center</h1>
+                        <p>Institutional pulse for <span id="current-date-display">Today</span></p>
+                    </header>
+                    <div class="stats-row">
+                        <div class="stat-box">
+                            <div class="icon-box blue"><i data-lucide="users"></i></div>
+                            <div class="info">
+                                <h3>Total Data</h3>
+                                <p id="ov-total-users">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="icon-box green"><i data-lucide="user-check"></i></div>
+                            <div class="info">
+                                <h3>Present</h3>
+                                <p id="ov-present">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="icon-box yellow"><i data-lucide="clock"></i></div>
+                            <div class="info">
+                                <h3>Late</h3>
+                                <p id="ov-late">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="icon-box red"><i data-lucide="user-x"></i></div>
+                            <div class="info">
+                                <h3>Absent</h3>
+                                <p id="ov-absent">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="main-chart card">
+                        <h3>Monthly Enrollment Activity</h3>
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                </section>
+
+                <section id="attendance" class="view">
+                    <header class="view-header">
+                        <h1>Attendance Engine</h1>
+                        <p>Scanning live environment for registered faces.</p>
+                    </header>
+                    <div class="attendance-grid">
+                        <div class="video-card card">
+                            <div class="video-container">
+                                <video id="cam-feed" autoplay playsinline muted></video>
+                                <div class="scanning-lines"></div>
+                                <div id="detection-msg">Engine Standby...</div>
+
+                                <!-- Recognition Confirmation Overlay -->
+                                <div id="recognition-confirm-overlay" class="confirm-overlay hidden">
+                                    <div class="confirm-card">
+                                        <div class="confirm-avatar" id="conf-avatar">?</div>
+                                        <div class="confirm-info">
+                                            <h4 id="conf-name">Analyzing...</h4>
+                                            <p id="conf-id">ID: ----</p>
+                                        </div>
+                                        <button id="confirm-entry-btn" class="confirm-btn">
+                                            <i data-lucide="check"></i> ENTER RECORD
+                                        </button>
+                                        <button id="cancel-entry-btn" class="cancel-btn">
+                                            <i data-lucide="x"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="cam-controls">
+                                <button id="cam-toggle" class="primary-btn lg"><i data-lucide="play"></i> Initialize AI
+                                    Engine</button>
+                            </div>
+                        </div>
+                        <div class="live-log card">
+                            <h3>Real-time Record Log</h3>
+                            <div id="session-log" class="log-entries"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="management" class="view">
+                    <header class="view-header">
+                        <div class="flex-title">
+                            <h1>Data Management</h1>
+                            <div class="header-actions">
+                                <button class="secondary-btn" onclick="openClassSettings()"><i
+                                        data-lucide="settings"></i> Manage Classes</button>
+                                <button class="primary-btn" onclick="openAddUser()"><i data-lucide="plus"></i> Add New
+                                    Record</button>
+                            </div>
+                        </div>
+                    </header>
+                    <div class="management-layout">
+                        <aside class="class-sidebar card">
+                            <h3>Classes / Sections</h3>
+                            <div id="class-list-nav" class="class-list">
+                                <!-- Classes will be listed here -->
+                                <button class="class-item active" onclick="selectClass('all')">All Records</button>
+                            </div>
+                        </aside>
+                        <div class="table-card card">
+                            <table id="users-table">
+                                <thead>
+                                    <tr>
+                                        <th>Profile</th>
+                                        <th>Name</th>
+                                        <th>Admission ID</th>
+                                        <th>Class</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="users-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <section id="reports" class="view">
+                    <header class="view-header">
+                        <h1>Analytical Intelligence</h1>
+                        <p>Detailed attendance reports and institutional insights.</p>
+                    </header>
+                    <div class="report-tabs card">
+                        <div class="tabs-header">
+                            <button class="report-tab active" onclick="switchReport('daily')">Daily Review</button>
+                            <button class="report-tab" onclick="switchReport('weekly')">Trends & Analytics</button>
+                            <button class="report-tab" onclick="switchReport('individual')">Member Audit</button>
+                        </div>
+
+                        <div id="daily-report" class="report-content active">
+                            <div class="report-actions-bar">
+                                <div class="report-filters">
+                                    <input type="date" id="daily-date-picker">
+                                    <button class="primary-btn" onclick="loadDailyReport()"><i data-lucide="search"></i>
+                                        Fetch Data</button>
+                                </div>
+                                <div class="export-actions">
+                                    <button class="secondary-btn" onclick="exportReport('csv')"><i
+                                            data-lucide="file-text"></i> CSV</button>
+                                    <button class="secondary-btn" onclick="exportReport('print')"><i
+                                            data-lucide="printer"></i> Print</button>
+                                </div>
+                            </div>
+
+                            <div id="report-summary-bar" class="report-summary-bar hidden">
+                                <div class="r-stat"><strong>0</strong><span>Present</span></div>
+                                <div class="r-stat text-warning"><strong>0</strong><span>Late</span></div>
+                                <div class="r-stat text-danger"><strong>0</strong><span>Absent</span></div>
+                                <div class="r-stat"><strong>0%</strong><span>Rate</span></div>
+                            </div>
+
+                            <div class="table-card">
+                                <table id="daily-table"></table>
+                            </div>
+                        </div>
+
+                        <div id="weekly-report" class="report-content">
+                            <div class="chart-box">
+                                <h3>7-Day Attendance Trend</h3>
+                                <div class="chart-wrapper"><canvas id="reportWeeklyChart"></canvas></div>
+                            </div>
+                        </div>
+
+                        <div id="individual-report" class="report-content">
+                            <div class="report-filters">
+                                <select id="individual-user-select"></select>
+                                <button class="primary-btn" onclick="loadIndividualReport()"><i
+                                        data-lucide="fingerprint"></i> Audit Member</button>
+                            </div>
+                            <div id="ind-summary" class="ind-summary-grid hidden">
+                                <div class="is-item">
+                                    <span class="label">Total Presence</span>
+                                    <span class="value" id="ind-total-present">0</span>
+                                </div>
+                                <div class="is-item">
+                                    <span class="label">Punctuality Rate</span>
+                                    <span class="value" id="ind-punctuality">0%</span>
+                                </div>
+                            </div>
+                            <div class="table-card">
+                                <table id="ind-table"></table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Modals & Tooltips -->
+        <div id="add-user-modal" class="modal-overlay hidden">
+            <div class="modal animate__animated animate__slideInDown">
+                <h2>Register New Face Record</h2>
+                <form id="add-user-form">
+                    <div class="registration-camera-container">
+                        <div class="reg-video-wrapper">
+                            <video id="reg-video" autoplay playsinline muted></video>
+                            <canvas id="reg-canvas" class="hidden"></canvas>
+                            <img id="reg-preview" class="hidden">
+                            <div class="camera-placeholder" id="reg-placeholder">
+                                <i data-lucide="camera-off"></i>
+                                <p>Initialize Camera for Enrollment</p>
+                            </div>
+                        </div>
+                        <div class="reg-controls">
+                            <button type="button" id="start-reg-cam" class="secondary-btn"><i data-lucide="video"></i>
+                                Open Camera</button>
+                            <button type="button" id="capture-reg-btn" class="primary-btn hidden"><i
+                                    data-lucide="camera"></i> Capture Face</button>
+                            <button type="button" id="retake-reg-btn" class="secondary-btn hidden"><i
+                                    data-lucide="rotate-ccw"></i> Retake Photo</button>
+                        </div>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="add-name" required placeholder="Ex: John Doe">
+                        </div>
+                        <div class="input-group">
+                            <label>Admission Number</label>
+                            <input type="text" id="add-id" required placeholder="Ex: ADM-2024-001">
+                        </div>
+                        <div class="input-group">
+                            <label>Roll Number</label>
+                            <input type="text" id="add-roll" required placeholder="Ex: 24">
+                        </div>
+                        <div class="input-group">
+                            <label>Assign to Class</label>
+                            <select id="add-class" required>
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+                        <input type="file" id="add-image" class="hidden" accept="image/*">
+                    </div>
+                    <div class="modal-btns">
+                        <button type="button" class="secondary-btn" onclick="closeAddUser()">Cancel</button>
+                        <button type="submit" class="primary-btn">Complete Enrollment <i
+                                data-lucide="user-plus"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Edit User Modal -->
+        <div id="edit-user-modal" class="modal-overlay hidden">
+            <div class="modal animate__animated animate__slideInDown">
+                <h2>Edit Member Record</h2>
+                <form id="edit-user-form">
+                    <input type="hidden" id="edit-user-id">
+                    <div class="registration-camera-container">
+                        <div class="reg-video-wrapper">
+                            <video id="edit-reg-video" autoplay playsinline muted></video>
+                            <canvas id="edit-reg-canvas" class="hidden"></canvas>
+                            <img id="edit-reg-preview" class="">
+                            <div class="camera-placeholder hidden" id="edit-reg-placeholder">
+                                <i data-lucide="camera-off"></i>
+                                <p>Initialize Camera to Update Photo</p>
+                            </div>
+                        </div>
+                        <div class="reg-controls">
+                            <button type="button" id="start-edit-cam" class="secondary-btn"><i data-lucide="video"></i>
+                                Update Photo</button>
+                            <button type="button" id="capture-edit-btn" class="primary-btn hidden"><i
+                                    data-lucide="camera"></i> Snap New Face</button>
+                            <button type="button" id="retake-edit-btn" class="secondary-btn hidden"><i
+                                    data-lucide="rotate-ccw"></i> Reset</button>
+                        </div>
+                    </div>
+                    <div class="input-grid">
+                        <div class="input-group">
+                            <label>Full Name</label>
+                            <input type="text" id="edit-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Admission ID</label>
+                            <input type="text" id="edit-id" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Roll Number</label>
+                            <input type="text" id="edit-roll" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Class</label>
+                            <select id="edit-class" required></select>
+                        </div>
+                    </div>
+                    <div class="modal-btns">
+                        <button type="button" class="secondary-btn" onclick="closeEditUser()">Discard</button>
+                        <button type="submit" class="primary-btn">Save Changes <i
+                                data-lucide="check-circle"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Class Settings Modal -->
+        <div id="class-settings-modal" class="modal-overlay hidden">
+            <div class="modal animate__animated animate__slideInDown">
+                <h2>Manage Classes</h2>
+                <div class="class-manager">
+                    <div class="add-class-box">
+                        <input type="text" id="new-class-name" placeholder="Enter Class Name (e.g. Grade 10-A)">
+                        <button class="primary-btn" onclick="addNewClass()">Add Class</button>
+                    </div>
+                    <ul id="manage-class-list" class="manage-class-list">
+                        <!-- Class list with delete buttons -->
+                    </ul>
+                </div>
+                <div class="modal-btns">
+                    <button class="secondary-btn" onclick="closeClassSettings()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="toast-container"></div>
+    </div>
+
+    <script src="/frontend/script.js"></script>
+</body>
+
+</html>
